@@ -25,9 +25,6 @@ def mostrarDatos():
     datos = crudCursos.obtenerDatos()
     print(datos)
 
-#boton = tk.Button(ventana, text="Mostrar datos", command=mostrarDatos)
-#boton.grid(row=5, column=0, columnspan=2)
-
 
 def limpiar():
     crudCursos.limpiarFormulario()
@@ -53,7 +50,6 @@ def agregar():
         messagebox.showwarning( "Validación", "Debe completar todos los campos.")
         return
 
-    #agregarCurso( nombre, int(duracion), profesor, int(cupo))
 
     try:
         duracion = int(duracion)
@@ -74,11 +70,7 @@ boton_agregar.grid( row=6, column=0, padx=5, pady=10)
 
 def mostrarSeleccion():
     crudCursos.cargarSeleccion()
-    #datos = crudCursos.obtenerSeleccion()
-    #print(datos)
 
-#boton_seleccionar = tk.Button( ventana, text="Ver selección",command=mostrarSeleccion)
-#boton_seleccionar.grid(row=7, column=0, columnspan=2)
 
 def modificar():
 
@@ -93,13 +85,19 @@ def modificar():
     profesor = datos["profesor"]
     cupo = datos["cupo"]
 
-    modificarCurso(
-        crudCursos.idSeleccionado,
-        nombre,
-        int(duracion),
-        profesor,
-        int(cupo)
-    )
+    if nombre == "" or duracion == "" or profesor == "" or cupo == "":
+        messagebox.showwarning("Validación","Debe completar todos los campos.")
+        return
+
+    try:
+        duracion = int(duracion)
+        cupo = int(cupo)
+
+    except ValueError:
+        messagebox.showwarning( "Validación","La duración y el cupo deben ser números enteros.")
+        return
+
+    modificarCurso( crudCursos.idSeleccionado, nombre, int(duracion), profesor,int(cupo))
 
     crudCursos.cargarDatos(listarCursos())
     crudCursos.limpiarFormulario()
@@ -117,10 +115,7 @@ def eliminar():
             messagebox.showwarning( "Validación","Debe seleccionar un curso.")
             return
 
-    respuesta = messagebox.askquestion(
-        "Confirmar eliminación",
-        "¿Está seguro de eliminar el curso?"
-    )
+    respuesta = messagebox.askquestion("Confirmar eliminación", "¿Está seguro de eliminar el curso?")
 
     if respuesta == "yes":
 
@@ -144,7 +139,6 @@ crudCursos.tabla.bind("<<TreeviewSelect>>",lambda event: crudCursos.cargarSelecc
 mostrarCursos()
 
 
-#gestion alumnos
 def abrirAlumnos():
 
     ventanaAlumnos = tk.Toplevel(ventana)
@@ -184,13 +178,6 @@ def abrirAlumnos():
         return
 
 
-        agregarAlumno( nombre, apellido, dni)
-
-        crudAlumnos.cargarDatos(listarAlumnos())
-        crudAlumnos.limpiarFormulario()
-
-        messagebox.showinfo("Registro", "El alumno se registró correctamente.", parent= ventanaAlumnos)
-
     boton_agregar = tk.Button(ventanaAlumnos, text="Registrar", command=agregar)
     boton_agregar.grid( row=5, column=0, padx=5,pady=10)
 
@@ -206,6 +193,17 @@ def abrirAlumnos():
         nombre = datos["nombre"]
         apellido = datos["apellido"]
         dni = datos["dni"]
+
+        if nombre == "" or apellido == "" or dni == "":
+            messagebox.showwarning("Validación","Debe completar todos los campos.", parent=ventanaAlumnos)
+            return
+
+        try:
+            dni = int(dni)
+
+        except ValueError:
+            messagebox.showwarning( "Validación","El dni debe ser número entero.", parent=ventanaAlumnos)
+            return
 
         modificarAlumno(crudAlumnos.idSeleccionado, nombre, apellido, dni)
 
