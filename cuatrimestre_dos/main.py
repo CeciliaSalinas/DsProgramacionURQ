@@ -1,226 +1,256 @@
 import tkinter as tk
-from conexion import conectar
-from curso import agregarCurso, listarCursos, modificarCurso, eliminarCurso
+from interfaz import Interfaz
+from curso import listarCursos,agregarCurso, modificarCurso, eliminarCurso
+from alumno import listarAlumnos, agregarAlumno, modificarAlumno, eliminarAlumno
 from tkinter import messagebox
-from tkinter import ttk
 
 ventana = tk.Tk()
-ventana.title("Sistema de gestion de cursos")
-ventana.geometry("600x700")
-ventana.configure(bg="#2c3e50")
-ventana.columnconfigure(0, weight=1)
-ventana.columnconfigure(1, weight=1)
-ventana.columnconfigure(2, weight=1)
 
-conexion = conectar()
+ventana.title("Sistema de gestión")
+ventana.geometry("570x520")
 
-def registrarCurso():
-    nombre = nombreCurso.get()
-    duracion = duracionCurso.get()
-    profesor = nombreProfesor.get()
-    cupo = cupoEstudiantes.get()
 
-    if nombre == "":
-        messagebox.showwarning("Validación","Debe ingresar el nombre del curso.")
-        return
+camposCurso = ["nombre", "duracion", "profesor","cupo"]
+columnasCurso = ["id", "nombre", "cantidad de meses","profesor", "cupo"]
 
-    if duracion == "":
-        messagebox.showwarning("Validación","Debe ingresar la duración del curso.")
-        return
+crudCursos = Interfaz(ventana,"Cursos",camposCurso, columnasCurso)
 
-    try:
-        duracion = int(duracionCurso.get())
-    except ValueError:
-        messagebox.showwarning("Validación","La duración debe ser en números.")
-        return
 
-    if profesor == "":
-        messagebox.showwarning("Validación","Debe ingresar el nombre del profesor.")
-        return
+camposAlumno = ["nombre", "apellido", "dni"]
+columnasAlumno = ["id", "nombre", "apellido", "dni"]
 
-    if cupo == "":
-        messagebox.showwarning("Validación","Debe ingresar el cupo de estudiantes del curso.")
-        return
-    try:
-        cupo = int(cupoEstudiantes.get())
-    except ValueError:
-        messagebox.showwarning("Validación","Debe ingresar números en el cupo de estudiantes.")
-        return
-    
-    agregarCurso(nombre, duracion, profesor, cupo)
+crudAlumnos = Interfaz( ventana, "Alumnos",camposAlumno,columnasAlumno)
 
-    messagebox.showinfo("Registro exitoso", "El curso se registró correctamente.")
+def mostrarDatos():
+    datos = crudCursos.obtenerDatos()
+    print(datos)
 
-    mostrarCursos()
+#boton = tk.Button(ventana, text="Mostrar datos", command=mostrarDatos)
+#boton.grid(row=5, column=0, columnspan=2)
 
-    nombreCurso.delete(0, tk.END)
-    duracionCurso.delete(0, tk.END)
-    nombreProfesor.delete(0, tk.END)
-    cupoEstudiantes.delete(0, tk.END)
+
+def limpiar():
+    crudCursos.limpiarFormulario()
+
+boton_limpiar = tk.Button(ventana,text="Limpiar",command=limpiar)
+boton_limpiar.grid(row=6, column=3, padx=5, pady=10)
+
 
 def mostrarCursos():
     cursos = listarCursos()
+    crudCursos.cargarDatos(cursos)
 
-    listaCursos.delete(*listaCursos.get_children())
+def agregar():
 
-    for curso in cursos:
-        id, nombre, duracion,profesor, cupo = curso
-        listaCursos.insert("", tk.END, values=(id, nombre,duracion,profesor,cupo))
+    datos = crudCursos.obtenerDatos()
 
+    nombre = datos["nombre"]
+    duracion = datos["duracion"]
+    profesor = datos["profesor"]
+    cupo = datos["cupo"]
 
-idCursoSeleccionado = None
-
-def seleccionarCurso(event):
-    global idCursoSeleccionado
-
-    seleccion = listaCursos.selection()
-
-    if seleccion:
-        item = seleccion[0]
-
-        datos = listaCursos.item(item, "values")
-
-        idCursoSeleccionado = datos[0]
-        nombre = datos[1]
-        duracion = datos[2]
-        profesor = datos[3]
-        cupo = datos[4]
-
-        nombreCurso.delete(0, tk.END)
-        nombreCurso.insert(0, nombre)
-
-        duracionCurso.delete(0, tk.END)
-        duracionCurso.insert(0, duracion)
-
-        nombreProfesor.delete(0, tk.END)
-        nombreProfesor.insert(0, profesor)
-
-        cupoEstudiantes.delete(0, tk.END)
-        cupoEstudiantes.insert(0, cupo)
-
-        print("ID del curso:", idCursoSeleccionado)
-
-def modificarCursoInterfaz():
-    global idCursoSeleccionado 
-
-    if idCursoSeleccionado is None:
-        messagebox.showwarning("Validación","Debe seleccionar un curso para modificar.")
+    if nombre == "" or duracion == "" or profesor == "" or cupo == "":
+        messagebox.showwarning( "Validación", "Debe completar todos los campos.")
         return
 
-    nombre = nombreCurso.get()
-    duracion = duracionCurso.get()
-    profesor = nombreProfesor.get()
-    cupo = cupoEstudiantes.get()  
-
-    if nombre == "":
-        messagebox.showwarning("Validación","Debe ingresar el nombre del curso.")
-        return 
+    #agregarCurso( nombre, int(duracion), profesor, int(cupo))
 
     try:
-        duracion = int(duracionCurso.get())
+        duracion = int(duracion)
+        cupo = int(cupo)
+
     except ValueError:
-        messagebox.showwarning("Validación","La duración debe ser en números.")
+        messagebox.showwarning( "Validación","La duración y el cupo deben ser números enteros.")
         return
 
+    crudCursos.cargarDatos(listarCursos())
+    crudCursos.limpiarFormulario()
 
-    if profesor == "":
-        messagebox.showwarning("Validación", "Debe ingresar el nombre del profesor.")
+    messagebox.showinfo( "Registro", "El curso se registró correctamente.")
+
+boton_agregar = tk.Button( ventana, text="Registrar", command=agregar)
+boton_agregar.grid( row=6, column=0, padx=5, pady=10)
+
+
+def mostrarSeleccion():
+    crudCursos.cargarSeleccion()
+    #datos = crudCursos.obtenerSeleccion()
+    #print(datos)
+
+#boton_seleccionar = tk.Button( ventana, text="Ver selección",command=mostrarSeleccion)
+#boton_seleccionar.grid(row=7, column=0, columnspan=2)
+
+def modificar():
+
+    if crudCursos.idSeleccionado is None:
+        messagebox.showwarning( "Validación", "Debe seleccionar un curso.")
         return
 
-    try:
-        cupo = int(cupoEstudiantes.get())
-    except ValueError:
-        messagebox.showwarning("Validación","Debe ingresar números en el cupo de estudiantes.")
-        return
+    datos = crudCursos.obtenerDatos()
 
-    modificarCurso(idCursoSeleccionado, nombre, duracion, profesor, cupo)
+    nombre = datos["nombre"]
+    duracion = datos["duracion"]
+    profesor = datos["profesor"]
+    cupo = datos["cupo"]
 
-    messagebox.showinfo("Modificación exitosa","El curso se modificó correctamente.")
+    modificarCurso(
+        crudCursos.idSeleccionado,
+        nombre,
+        int(duracion),
+        profesor,
+        int(cupo)
+    )
 
-    mostrarCursos()  
+    crudCursos.cargarDatos(listarCursos())
+    crudCursos.limpiarFormulario()
+    crudCursos.idSeleccionado = None
 
-    nombreCurso.delete(0, tk.END)
-    duracionCurso.delete(0, tk.END)
-    nombreProfesor.delete(0, tk.END)
-    cupoEstudiantes.delete(0, tk.END)  
+    messagebox.showinfo("Modificación", "El curso se modificó correctamente.")
 
-    idCursoSeleccionado = None
-            
-def eliminarCursoInterfaz():
-    global idCursoSeleccionado
+boton_modificar = tk.Button(ventana,text="Modificar",command=modificar)
+boton_modificar.grid( row=6, column=1, padx=5, pady=10)
 
-    if idCursoSeleccionado is None:
-        messagebox.showwarning( "Validación","Debe seleccionar un curso para eliminar.")
-        return
 
-    respuesta = messagebox.askquestion("Confirmar eliminación","¿Está seguro de que desea eliminar este curso?")
+def eliminar():
+
+    if crudCursos.idSeleccionado is None:
+            messagebox.showwarning( "Validación","Debe seleccionar un curso.")
+            return
+
+    respuesta = messagebox.askquestion(
+        "Confirmar eliminación",
+        "¿Está seguro de eliminar el curso?"
+    )
 
     if respuesta == "yes":
-        eliminarCurso(idCursoSeleccionado)
 
-        messagebox.showinfo("Eliminación exitosa","El curso se eliminó correctamente.")
-        
-        mostrarCursos()
+        eliminarCurso(crudCursos.idSeleccionado)
 
-        nombreCurso.delete(0, tk.END)
-        duracionCurso.delete(0, tk.END)
-        nombreProfesor.delete(0, tk.END)
-        cupoEstudiantes.delete(0, tk.END)
+        crudCursos.cargarDatos(listarCursos())
+        crudCursos.limpiarFormulario()
+        crudCursos.idSeleccionado = None
 
-        idCursoSeleccionado = None
+        messagebox.showinfo("Eliminación","El curso se eliminó correctamente.")
 
-        
-tk.Label(ventana,text="REGISTRAR CURSO", font="Arial 14 bold",fg="pink", bg="#2c3e50").grid(row=0, column=0, columnspan=2, pady=20)
-
-tk.Label(ventana,text="Nombre curso:", fg="white", font="Arial 12", bg="#2c3e50").grid(row=1, column=0, padx=10, pady=10, sticky="e")
-nombreCurso = tk.Entry(ventana)
-nombreCurso.grid(row=1, column=1, padx=10, pady=10)
-
-tk.Label(ventana,text="Duración:" ,fg="white", font="Arial 12", bg="#2c3e50").grid(row=2, column=0, padx=10, pady=10, sticky="e")
-duracionCurso = tk.Entry(ventana)
-duracionCurso.grid(row=2, column=1, padx=10, pady=10)
-
-tk.Label(ventana,text="Profesor/a:",fg="white", font="Arial 12", bg="#2c3e50").grid(row=3, column=0, padx=10, pady=10, sticky="e")
-nombreProfesor = tk.Entry(ventana)
-nombreProfesor.grid(row=3, column=1, padx=10, pady=10)
-
-tk.Label(ventana,text="Cupo:",fg="white", font="Arial 12", bg="#2c3e50").grid(row=4, column=0, padx=10, pady=10, sticky="e")
-cupoEstudiantes = tk.Entry(ventana)
-cupoEstudiantes.grid(row=4, column=1, padx=10, pady=10)
+boton_eliminar = tk.Button(ventana, text="Eliminar", command=eliminar)
+boton_eliminar.grid(row=6, column=2, padx=5, pady=10)
 
 
-boton_agregar = tk.Button(ventana,text="Registrar", width=11, command=registrarCurso)
-boton_agregar.grid(row=5, column=0, padx=5, pady=20)
+crudCursos.crearFormulario()
+crudCursos.crearTabla()
+crudCursos.tabla.bind("<<TreeviewSelect>>",lambda event: crudCursos.cargarSeleccion())
 
-boton_modificar = tk.Button(ventana,text="Modificar", width=11, command=modificarCursoInterfaz)
-boton_modificar.grid(row=5, column=1, padx=5, pady=20)
-
-boton_eliminar = tk.Button(ventana,text="Eliminar", width=11, command=eliminarCursoInterfaz)
-boton_eliminar.grid(row=5, column=2, padx=5, pady=20)
-
-
-
-tk.Label(ventana, text="CURSOS REGISTRADOS", font="Arial 14 bold", fg="pink", bg="#2c3e50").grid(row=7, column=0, columnspan=3, pady=20)
-#listaCursos = tk.Listbox(ventana, width=60, height=10)
-listaCursos = ttk.Treeview(ventana,columns=("id", "nombre", "duracion", "profesor", "cupo"), show="headings",height=10)
-
-listaCursos.heading("id", text="ID", anchor="center")
-listaCursos.heading("nombre", text="Nombre", anchor="center")
-listaCursos.heading("duracion", text="Duración en meses", anchor="center")
-listaCursos.heading("profesor", text="Profesor", anchor="center")
-listaCursos.heading("cupo", text="Cupo alumnos", anchor="center")
-
-listaCursos.column("id", width=50, anchor="center")
-listaCursos.column("nombre", width=120, anchor="center")
-listaCursos.column("duracion", width=120, anchor="center")
-listaCursos.column("profesor", width=150, anchor="center")
-listaCursos.column("cupo", width=120, anchor="center")
-
-listaCursos.grid(row=8, column=0, columnspan=3,padx=20, pady=10)
-#listaCursos.bind("<<ListboxSelect>>", seleccionarCurso)
-listaCursos.bind("<<TreeviewSelect>>", seleccionarCurso)
 
 mostrarCursos()
+
+
+#gestion alumnos
+def abrirAlumnos():
+
+    ventanaAlumnos = tk.Toplevel(ventana)
+
+    ventanaAlumnos.title("Gestión de alumnos")
+    ventanaAlumnos.geometry("600x500")
+
+    ventanaAlumnos.lift()
+    ventanaAlumnos.focus_force()
+
+    crudAlumnos = Interfaz(ventanaAlumnos,"Alumnos", camposAlumno, columnasAlumno)
+
+    crudAlumnos.crearFormulario()
+    crudAlumnos.crearTabla()
+    crudAlumnos.cargarDatos(listarAlumnos())
+
+    crudAlumnos.tabla.bind("<<TreeviewSelect>>",lambda event: crudAlumnos.cargarSeleccion())
+
+
+
+    def agregar():
+        datos = crudAlumnos.obtenerDatos()
+
+        nombre = datos["nombre"]
+        apellido = datos["apellido"]
+        dni = datos["dni"]
+
+        if nombre == "" or apellido == "" or dni == "" :
+            messagebox.showwarning( "Validación", "Debe completar todos los campos.", parent=ventanaAlumnos)
+            return
+
+        try:
+            dni = int(dni)
+
+        except ValueError:
+            messagebox.showwarning( "Validación","El dni debe ser número entero.", parent=ventanaAlumnos)
+        return
+
+
+        agregarAlumno( nombre, apellido, dni)
+
+        crudAlumnos.cargarDatos(listarAlumnos())
+        crudAlumnos.limpiarFormulario()
+
+        messagebox.showinfo("Registro", "El alumno se registró correctamente.", parent= ventanaAlumnos)
+
+    boton_agregar = tk.Button(ventanaAlumnos, text="Registrar", command=agregar)
+    boton_agregar.grid( row=5, column=0, padx=5,pady=10)
+
+
+    def modificar():
+
+        if crudAlumnos.idSeleccionado is None:
+                messagebox.showwarning("Validación","Debe seleccionar un alumno.", parent=ventanaAlumnos)
+                return
+
+        datos = crudAlumnos.obtenerDatos()
+
+        nombre = datos["nombre"]
+        apellido = datos["apellido"]
+        dni = datos["dni"]
+
+        modificarAlumno(crudAlumnos.idSeleccionado, nombre, apellido, dni)
+
+        crudAlumnos.cargarDatos(listarAlumnos())
+        crudAlumnos.limpiarFormulario()
+        crudAlumnos.idSeleccionado = None
+
+        messagebox.showinfo("Modificación", "El alumno se modificó correctamente.",parent=ventanaAlumnos)
+
+    boton_modificar = tk.Button(ventanaAlumnos, text="Modificar",command=modificar)
+    boton_modificar.grid(row=5,column=1, padx=5,pady=10)
+
+
+    def eliminar():
+
+        if crudAlumnos.idSeleccionado is None:
+            messagebox.showwarning( "Validación","Debe seleccionar un alumno.", parent=ventanaAlumnos)
+            return
+
+        respuesta = messagebox.askquestion( "Confirmar eliminación", "¿Está seguro de eliminar el alumno?",parent=ventanaAlumnos)
+
+        if respuesta == "yes":
+
+            eliminarAlumno(crudAlumnos.idSeleccionado)
+
+            crudAlumnos.cargarDatos(listarAlumnos())
+            crudAlumnos.limpiarFormulario()
+
+            crudAlumnos.idSeleccionado = None
+
+            messagebox.showinfo( "Eliminación", "El alumno se eliminó correctamente.", parent=ventanaAlumnos)
+
+    boton_eliminar = tk.Button( ventanaAlumnos, text="Eliminar", command=eliminar)
+    boton_eliminar.grid( row=5, column=2, padx=5,pady=10)
+
+    def limpiar():
+        crudAlumnos.limpiarFormulario()
+
+    boton_limpiar = tk.Button( ventanaAlumnos, text="Limpiar",command=limpiar)
+    boton_limpiar.grid( row=5, column=3, padx=5, pady=10)
+
+boton_alumnos = tk.Button(ventana, text="Gestionar Alumnos", command=abrirAlumnos)
+boton_alumnos.grid(row=8, column=0, padx=5, pady=10)
+
 ventana.mainloop()
+
 
 
