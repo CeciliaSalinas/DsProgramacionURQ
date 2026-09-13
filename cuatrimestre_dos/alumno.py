@@ -3,8 +3,8 @@ from conexion import conectar
 def agregarAlumno(nombre, apellido, dni):
 
     conexion = conectar()
-    
     cursor = conexion.cursor()
+
     cursor.execute(" INSERT INTO alumnos (nombre, apellido, dni) VALUES (?, ?, ?)",
                     (nombre, apellido, dni))
 
@@ -19,6 +19,7 @@ def listarAlumnos():
     conexion = conectar()
 
     cursor = conexion.cursor()
+
     cursor.execute("SELECT id, nombre, apellido, dni FROM alumnos")
 
     alumnos = cursor.fetchall()
@@ -28,11 +29,13 @@ def listarAlumnos():
 
     return alumnos
 
+
 def modificarAlumno(idAlumno, nombre, apellido, dni):
 
     conexion = conectar()
 
     cursor = conexion.cursor()
+
     cursor.execute("UPDATE alumnos SET nombre = ?, apellido = ?, dni = ? WHERE id = ?",
                     (nombre, apellido, dni, idAlumno))
 
@@ -47,9 +50,12 @@ def eliminarAlumno(idAlumno):
     conexion = conectar()
 
     cursor = conexion.cursor()
+
     cursor.execute("DELETE FROM alumnos WHERE id = ?", (idAlumno,))
 
     conexion.commit()
 
     cursor.close()
     conexion.close()
+
+eliminarAlumno(1)

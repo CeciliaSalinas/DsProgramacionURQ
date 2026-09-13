@@ -13,25 +13,30 @@ class Interfaz:
 
 
     def crearFormulario(self):
+    
         for i, campo in enumerate(self.campos):
 
             label = tk.Label(self.ventana, text=campo.capitalize())
+
             label.grid(row=i, column=0)
 
             entry = tk.Entry(self.ventana)
+
             entry.grid(row=i, column=1)
             self.entries[campo] = entry
 
     
     def obtenerDatos(self):
         datos = {}
-        
+    
         for campo in self.campos:
             datos[campo] = self.entries[campo].get()
+
         return datos
 
 
     def limpiarFormulario(self):
+        
         for campo in self.campos:
             self.entries[campo].delete(0, tk.END)
 
@@ -48,9 +53,9 @@ class Interfaz:
 
 
     def cargarDatos(self, datos):
-
+       
         self.tabla.delete(*self.tabla.get_children())
-   
+        
         for fila in datos:
             self.tabla.insert("", tk.END, values=fila)
 

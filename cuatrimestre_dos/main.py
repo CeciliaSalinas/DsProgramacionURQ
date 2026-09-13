@@ -50,6 +50,7 @@ def agregar():
         messagebox.showwarning( "Validación", "Debe completar todos los campos.")
         return
 
+    agregarCurso( nombre, int(duracion), profesor, int(cupo))
 
     try:
         duracion = int(duracion)
@@ -115,7 +116,10 @@ def eliminar():
             messagebox.showwarning( "Validación","Debe seleccionar un curso.")
             return
 
-    respuesta = messagebox.askquestion("Confirmar eliminación", "¿Está seguro de eliminar el curso?")
+    respuesta = messagebox.askquestion(
+        "Confirmar eliminación",
+        "¿Está seguro de eliminar el curso?"
+    )
 
     if respuesta == "yes":
 
